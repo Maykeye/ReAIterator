@@ -4,14 +4,17 @@ Simple script to call the text editor to edit prompt for the model.
 Editor is configured by $EDITOR env var(vim is default). 
 
 Options:
---model, -m
+--model, -m (mandatory)
     Path to the model. E.g. /home/user/models/llama2.gptq/gptq/model-4bit-128g.safetensors
---prompt, -p
-    Path to write the story to E.g. /tmp/prompt.ptxt
---n_gens, -g
-    Number of responses to generate (default: 4)
---n_tokens, -t
-    Number of tokens to generate (default: 128)
+--prompt, -p (default: /tmp/prompt.ptxt)
+    Path to write the story to
+--n_gens, -g (default: 4)
+    Number of responses to generate
+--n_tokens, -t (default: 128)
+    Number of tokens to generate
+--max_len, -x
+    Maximum number of tokens in prompt
+
 
 Features are
 * It allows to mark blocks of text to be excluded from generation.

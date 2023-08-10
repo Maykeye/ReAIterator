@@ -26,6 +26,12 @@ opt_parser.add_option(
     action="store", dest="n_tokens", type="int",
     default=128,
     help="number of tokens to generate (default: 128)")
+opt_parser.add_option(
+    "-x", "--max_len",
+    action="store", dest="max_len", type="int",
+    default=2000,
+    help="if prompt has more tokens than this value, require user to rewrite the prompt (default: 2000)")
+
 
 options, args = opt_parser.parse_args()
 
@@ -43,8 +49,9 @@ n_gens = options.n_gens
 assert n_gens > 0
 n_tokens = options.n_tokens
 assert n_tokens > 0
+max_len = options.max_len
+assert max_len > 0
 
-PROMPT_LEN_TO_SPLIT = 2000
 MARKER = ";;;"
 MARKER_SKIP_SUFFIX = f"-"
 MARKER_QUIT_SUFFIX = f"---"
@@ -101,8 +108,8 @@ export_prompt()
 while True:
     reconstructed_prompt = reconstruct_prompt(prompt)
     n_tokens = backend(CMD_TOKEN_COUNT, prompt=reconstructed_prompt)
-    if n_tokens > PROMPT_LEN_TO_SPLIT:
-        input(f"vvv SPLIT vvv [promptlen: {n_tokens}/{PROMPT_LEN_TO_SPLIT}")
+    if n_tokens > max_len:
+        input(f"vvv SPLIT vvv [promptlen: {n_tokens}/{max_len}")
         export_prompt()
         continue
 
