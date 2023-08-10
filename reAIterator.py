@@ -1,24 +1,20 @@
 from tqdm.auto import tqdm
 import os
 from pathlib import Path
+from backend_utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
+import gptq
 
 STORY = "/tmp/prompt.ptxt"
 ACTUAL_PROMPT = f"{STORY}.act"
 MODEL_ID_PATH = os.path.expanduser("~/models/Nous-Hermes-Llama2-GPTQ")
-USE_TRITON = False
 MODEL_BASENAME = "gptq_model-4bit-128g"
 PROMPT_LEN_TO_SPLIT = 2000
 N_GENS = 4
-N_TOKENS = 128
-TEMPERATURE = 0.7
 MARKER = ";;;"
-MARKER_SKIP = f"{MARKER}-"
-MARKER_QUIT = f"{MARKER}---"
-
-# Back-end commands
-CMD_INIT = "init"
-CMD_TOKEN_COUNT = "token-count"
-CMD_GENERATE = "generate"
+MARKER_SKIP_SUFFIX = f"-"
+MARKER_QUIT_SUFFIX = f"---"
+MARKER_GLUE_SUFFIX = f"^"
+MARKER_QUIT = f"{MARKER}{MARKER_QUIT_SUFFIX}"
 
 
 def export_prompt():
@@ -29,37 +25,6 @@ def export_prompt():
     editor = os.environ.get("EDITOR", "vim")
     os.system(f"{editor} {STORY}")
     prompt = Path(f"{STORY}").read_text()
-
-
-def gptq(cmd, prompt=None, state={}):
-    from auto_gptq import AutoGPTQForCausalLM
-    from transformers import AutoTokenizer
-    if cmd == CMD_INIT:
-        assert prompt is None
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID_PATH)
-        model = AutoGPTQForCausalLM.from_quantized(
-            MODEL_ID_PATH,
-            model_basename=MODEL_BASENAME,
-            use_safetensors=True,
-            trust_remote_code=False,
-            device="cuda:0",
-            use_triton=USE_TRITON,
-            quantize_config=None)
-        state["tokenizer"] = tokenizer
-        state["model"] = model
-        return
-
-    tokenizer, model = state["tokenizer"], state["model"]
-    if cmd == CMD_TOKEN_COUNT:
-        assert prompt is not None
-        return len(tokenizer(prompt).input_ids)
-    if cmd == CMD_GENERATE:
-        input_ids = tokenizer(prompt, return_tensors="pt").input_ids.to("cuda")
-        outs = model.generate(
-            inputs=input_ids, do_sample=True,
-            temperature=TEMPERATURE, max_new_tokens=N_TOKENS)
-        return tokenizer.decode(outs[0], skip_special_tokens=True)
-    raise ValueError(f"Unknown command {cmd}")
 
 
 if Path(STORY).exists():
@@ -76,22 +41,26 @@ def reconstruct_prompt(whole_prompt):
     res = ""
     for part in parts:
         part = part.removeprefix("\n")
-        if part.startswith("---"):
+        if part.startswith(MARKER_QUIT_SUFFIX):
+            if part[len(MARKER_QUIT_SUFFIX):len(MARKER_QUIT_SUFFIX)+1] == MARKER_GLUE_SUFFIX:
+                res = res.removesuffix("\n")
             break
-        if part.startswith("-^"):
-            res = res.removesuffix("\n")
+        if part.startswith(MARKER_SKIP_SUFFIX):
+            if part[len(MARKER_SKIP_SUFFIX):len(MARKER_SKIP_SUFFIX)+1] == MARKER_GLUE_SUFFIX:
+                res = res.removesuffix("\n")
             continue
-        if part.startswith("-"):
-            continue
-        if part.startswith('^'):
+        if part.startswith(MARKER_GLUE_SUFFIX):
             part = part[1:]
             res = res.removesuffix("\n")
         res += part
     return res
 
 
-backend = gptq
-backend(CMD_INIT)
+backend = gptq.backend_gptq
+backend(CMD_INIT, None, {
+    gptq.MODEL_NAME_OR_PATH: MODEL_ID_PATH,
+    gptq.MODEL_BASENAME: MODEL_BASENAME
+})
 
 export_prompt()
 while True:
