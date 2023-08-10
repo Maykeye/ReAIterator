@@ -2,6 +2,7 @@ from tqdm.auto import tqdm
 import os
 from pathlib import Path
 from backend_utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
+from backend_utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K
 # import backend_gptq
 import backend_exllama
 from optparse import OptionParser
@@ -31,7 +32,18 @@ opt_parser.add_option(
     action="store", dest="max_len", type="int",
     default=2000,
     help="if prompt has more tokens than this value, require user to rewrite the prompt (default: 2000)")
-
+opt_parser.add_option(
+    "--g_temperature", dest="g_temperature", type="float",
+    help="Generator parameter: temperature")
+opt_parser.add_option(
+    "--g_repetition_penalty", dest="g_repetition_penalty", type="float",
+    help="Generation parameter: repetition penalty")
+opt_parser.add_option(
+    "--g_top_p", dest="g_top_p", type="float",
+    help="Generator parameter: top P")
+opt_parser.add_option(
+    "--g_top_k", dest="g_top_k", type="int",
+    help="Generator parameter: top K")
 
 options, args = opt_parser.parse_args()
 
@@ -101,25 +113,28 @@ def reconstruct_prompt(whole_prompt):
 backend = backend_exllama.backend_exllama
 backend(CMD_INIT, None, {
     backend_exllama.MODEL_NAME_OR_PATH: model_path,
-    backend_exllama.MODEL_BASENAME: model_basename
+    backend_exllama.MODEL_BASENAME: model_basename,
+    G_TEMPERATURE: options.g_temperature,
+    G_REPETITION_PENALTY: options.g_repetition_penalty,
+    G_TOP_P: options.g_top_p,
+    G_TOP_K: options.g_top_k,
+    N_TOKENS: n_tokens
 })
 
 export_prompt()
 while True:
     reconstructed_prompt = reconstruct_prompt(prompt)
-    n_tokens = backend(CMD_TOKEN_COUNT, prompt=reconstructed_prompt)
-    if n_tokens > max_len:
-        input(f"vvv SPLIT vvv [promptlen: {n_tokens}/{max_len}")
+    current_len = backend(CMD_TOKEN_COUNT, prompt=reconstructed_prompt)
+    if current_len > max_len:
+        input(f"vvv SPLIT vvv [promptlen: {current_len}/{max_len}")
         export_prompt()
         continue
 
-    print(f"Prompt length: {n_tokens}")
+    print(f"Prompt length: {current_len}")
     start = len(reconstructed_prompt)
     outs = [""]
     for _ in tqdm(range(n_gens), desc="Generations"):
-        generated = backend(CMD_GENERATE, prompt=reconstructed_prompt, cfg={
-            N_TOKENS: n_tokens
-        })
+        generated = backend(CMD_GENERATE, prompt=reconstructed_prompt)
         outs.append(generated[start:])
 
     outs = "\n~~~v~~~\n".join(outs)

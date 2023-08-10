@@ -4,13 +4,15 @@ from exllama.generator import ExLlamaGenerator
 import os
 import glob
 from backend_utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
+from backend_utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K
 
 
 MODEL_NAME_OR_PATH = "model_directory"
 MODEL_BASENAME = "model_basename"
 model = None
 tokenizer = None
-generator = None
+generator: ExLlamaGenerator = None
+gen_config = {}
 
 
 def backend_exllama(cmd, prompt=None, cfg={}):
@@ -38,12 +40,20 @@ def backend_exllama(cmd, prompt=None, cfg={}):
 
         generator.disallow_tokens([tokenizer.eos_token_id])
 
-        # TODO: configure
         generator.settings.token_repetition_penalty_max = 1.2
         generator.settings.temperature = 0.95
         generator.settings.top_p = 0.75
         generator.settings.top_k = 140
         generator.settings.typical = 0.5
+        if cfg[G_REPETITION_PENALTY] is not None:
+            generator.settings.token_repetition_penalty_max = cfg[G_REPETITION_PENALTY]
+        if cfg[G_TEMPERATURE] is not None:
+            generator.settings.temperature = cfg[G_TEMPERATURE]
+        if cfg[G_TOP_P] is not None:
+            generator.settings.top_p = cfg[G_TOP_P]
+        if cfg[G_TOP_K] is not None:
+            generator.settings.top_k = cfg[G_TOP_K]
+        gen_config[N_TOKENS] = cfg[N_TOKENS]
         return
 
     if cmd == CMD_TOKEN_COUNT:
@@ -51,8 +61,7 @@ def backend_exllama(cmd, prompt=None, cfg={}):
         return tokenizer.encode(prompt).shape[1]
 
     if cmd == CMD_GENERATE:
-        n_tokens = cfg[N_TOKENS]
-        output = generator.generate_simple(prompt, max_new_tokens=n_tokens)
+        output = generator.generate_simple(prompt, max_new_tokens=gen_config[N_TOKENS])
         return output
 
     raise ValueError(f"Unknown command {cmd}")

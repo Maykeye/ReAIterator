@@ -14,7 +14,8 @@ Options:
     Number of tokens to generate
 --max_len, -x
     Maximum number of tokens in prompt
-
+--g_temperature, --g_repetition_penalty, --g_top_p, --g_top_k
+    Generator parameters
 
 Features are
 * It allows to mark blocks of text to be excluded from generation.
