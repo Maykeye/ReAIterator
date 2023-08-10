@@ -2,7 +2,8 @@ from tqdm.auto import tqdm
 import os
 from pathlib import Path
 from backend_utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
-import gptq
+# import backend_gptq
+import backend_exllama
 
 STORY = "/tmp/prompt.ptxt"
 ACTUAL_PROMPT = f"{STORY}.act"
@@ -56,10 +57,10 @@ def reconstruct_prompt(whole_prompt):
     return res
 
 
-backend = gptq.backend_gptq
+backend = backend_exllama.backend_exllama
 backend(CMD_INIT, None, {
-    gptq.MODEL_NAME_OR_PATH: MODEL_ID_PATH,
-    gptq.MODEL_BASENAME: MODEL_BASENAME
+    backend_exllama.MODEL_NAME_OR_PATH: MODEL_ID_PATH,
+    backend_exllama.MODEL_BASENAME: MODEL_BASENAME
 })
 
 export_prompt()
