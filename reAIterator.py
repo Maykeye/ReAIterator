@@ -21,6 +21,11 @@ opt_parser.add_option(
     action="store", dest="n_gens", type="int",
     default=4,
     help="number of responses to generate (default: 4)")
+opt_parser.add_option(
+    "-t", "--n_tokens",
+    action="store", dest="n_tokens", type="int",
+    default=128,
+    help="number of tokens to generate (default: 128)")
 
 options, args = opt_parser.parse_args()
 
@@ -36,6 +41,8 @@ prompt_path = options.prompt
 reconstructed_prompt_path = f"{prompt_path}.act"
 n_gens = options.n_gens
 assert n_gens > 0
+n_tokens = options.n_tokens
+assert n_tokens > 0
 
 PROMPT_LEN_TO_SPLIT = 2000
 MARKER = ";;;"
@@ -103,7 +110,9 @@ while True:
     start = len(reconstructed_prompt)
     outs = [""]
     for _ in tqdm(range(n_gens), desc="Generations"):
-        generated = backend(CMD_GENERATE, prompt=reconstructed_prompt)
+        generated = backend(CMD_GENERATE, prompt=reconstructed_prompt, cfg={
+            N_TOKENS: n_tokens
+        })
         outs.append(generated[start:])
 
     outs = "\n~~~v~~~\n".join(outs)

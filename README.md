@@ -10,7 +10,9 @@ Options:
     Path to write the story to E.g. /tmp/prompt.ptxt
 --n_gens, -n
     Number of responses to generate (default: 4)
-  
+--n_tokens, -t
+    Number of tokens to generate (default: 128)
+
 Features are
 * It allows to mark blocks of text to be excluded from generation.
 * It generates 4 responses one by one to preserve precious VRAM

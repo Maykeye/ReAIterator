@@ -13,17 +13,17 @@ tokenizer = None
 generator = None
 
 
-def backend_exllama(cmd, prompt=None, state={}):
+def backend_exllama(cmd, prompt=None, cfg={}):
     global model
     global tokenizer
     global generator
 
     if cmd == CMD_INIT:
-        model_directory = state[MODEL_NAME_OR_PATH]
+        model_directory = cfg[MODEL_NAME_OR_PATH]
         tokenizer_path = os.path.join(model_directory, "tokenizer.model")
         model_config_path = os.path.join(model_directory, "config.json")
-        if MODEL_BASENAME in state:
-            model_path = os.path.join(model_directory, state[MODEL_BASENAME]+".safetensors")
+        if MODEL_BASENAME in cfg:
+            model_path = os.path.join(model_directory, cfg[MODEL_BASENAME]+".safetensors")
         else:
             st_pattern = os.path.join(model_directory, "*.safetensors")
             model_path = glob.glob(st_pattern)[0]
@@ -51,7 +51,8 @@ def backend_exllama(cmd, prompt=None, state={}):
         return tokenizer.encode(prompt).shape[1]
 
     if cmd == CMD_GENERATE:
-        output = generator.generate_simple(prompt, max_new_tokens=N_TOKENS)
+        n_tokens = cfg[N_TOKENS]
+        output = generator.generate_simple(prompt, max_new_tokens=n_tokens)
         return output
 
     raise ValueError(f"Unknown command {cmd}")
