@@ -16,6 +16,12 @@ opt_parser.add_option(
     action="store", dest="prompt", type="string",
     default="/tmp/prompt.ptxt",
     help="full path to the text file with prompt (e.g. /tmp/prompt.ptxt)")
+opt_parser.add_option(
+    "-n", "--n_gens",
+    action="store", dest="n_gens", type="int",
+    default=4,
+    help="number of responses to generate (default: 4)")
+
 options, args = opt_parser.parse_args()
 
 assert options.model is not None, "Use --model /path/to/the/model.safetensors"
@@ -27,9 +33,11 @@ else:
     model_basename = None
 
 prompt_path = options.prompt
-ACTUAL_PROMPT = f"{prompt_path}.act"
+reconstructed_prompt_path = f"{prompt_path}.act"
+n_gens = options.n_gens
+assert n_gens > 0
+
 PROMPT_LEN_TO_SPLIT = 2000
-N_GENS = 4
 MARKER = ";;;"
 MARKER_SKIP_SUFFIX = f"-"
 MARKER_QUIT_SUFFIX = f"---"
@@ -40,7 +48,7 @@ MARKER_QUIT = f"{MARKER}{MARKER_QUIT_SUFFIX}"
 def export_prompt():
     global prompt
     global reconstruct_prompt
-    Path(ACTUAL_PROMPT).write_text(reconstructed_prompt)
+    Path(reconstructed_prompt_path).write_text(reconstructed_prompt)
     Path(prompt_path).write_text(prompt)
     editor = os.environ.get("EDITOR", "vim")
     os.system(f"{editor} {prompt_path}")
@@ -94,7 +102,7 @@ while True:
     print(f"Prompt length: {n_tokens}")
     start = len(reconstructed_prompt)
     outs = [""]
-    for _ in tqdm(range(N_GENS), desc="Generations"):
+    for _ in tqdm(range(n_gens), desc="Generations"):
         generated = backend(CMD_GENERATE, prompt=reconstructed_prompt)
         outs.append(generated[start:])
 
