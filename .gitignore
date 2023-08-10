@@ -1,3 +1,7 @@
+# my scripts to launch the reaiterator
+_*.sh
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
