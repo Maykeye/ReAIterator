@@ -10,9 +10,14 @@ opt_parser = OptionParser()
 opt_parser.add_option(
     "-m", "--model",
     action="store", dest="model", type="string",
-    help="full path to the model")
-
+    help="full path to the model (e.g. /path/model.safetensors)")
+opt_parser.add_option(
+    "-p", "--prompt",
+    action="store", dest="prompt", type="string",
+    default="/tmp/prompt.ptxt",
+    help="full path to the text file with prompt (e.g. /tmp/prompt.ptxt)")
 options, args = opt_parser.parse_args()
+
 assert options.model is not None, "Use --model /path/to/the/model.safetensors"
 model_path = Path(options.model)
 if model_path.suffix == ".safetensors":
@@ -21,9 +26,8 @@ if model_path.suffix == ".safetensors":
 else:
     model_basename = None
 
-
-STORY = "/tmp/prompt.ptxt"
-ACTUAL_PROMPT = f"{STORY}.act"
+prompt_path = options.prompt
+ACTUAL_PROMPT = f"{prompt_path}.act"
 PROMPT_LEN_TO_SPLIT = 2000
 N_GENS = 4
 MARKER = ";;;"
@@ -37,14 +41,14 @@ def export_prompt():
     global prompt
     global reconstruct_prompt
     Path(ACTUAL_PROMPT).write_text(reconstructed_prompt)
-    Path(STORY).write_text(prompt)
+    Path(prompt_path).write_text(prompt)
     editor = os.environ.get("EDITOR", "vim")
-    os.system(f"{editor} {STORY}")
-    prompt = Path(f"{STORY}").read_text()
+    os.system(f"{editor} {prompt_path}")
+    prompt = Path(f"{prompt_path}").read_text()
 
 
-if Path(STORY).exists():
-    prompt = Path(STORY).read_text()
+if Path(prompt_path).exists():
+    prompt = Path(prompt_path).read_text()
 else:
     prompt = "Below is an instruction that describes a task. Write a response that appropriately completes the request.\n\n"
     prompt += "### Instruction: In a galaxy far far away\n\n"

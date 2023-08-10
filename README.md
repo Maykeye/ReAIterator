@@ -6,6 +6,8 @@ Editor is configured by $EDITOR env var(vim is default).
 Options:
 --model, -m
     Path to the model. E.g. /home/user/models/llama2.gptq/gptq/model-4bit-128g.safetensors
+--prompt, -p
+    Path to write the story to E.g. /tmp/prompt.ptxt
 
 Features are
 * It allows to mark blocks of text to be excluded from generation.
