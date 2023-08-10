@@ -17,7 +17,7 @@ opt_parser.add_option(
     default="/tmp/prompt.ptxt",
     help="full path to the text file with prompt (e.g. /tmp/prompt.ptxt)")
 opt_parser.add_option(
-    "-n", "--n_gens",
+    "-g", "--n_gens",
     action="store", dest="n_gens", type="int",
     default=4,
     help="number of responses to generate (default: 4)")

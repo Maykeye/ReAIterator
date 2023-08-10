@@ -8,7 +8,7 @@ Options:
     Path to the model. E.g. /home/user/models/llama2.gptq/gptq/model-4bit-128g.safetensors
 --prompt, -p
     Path to write the story to E.g. /tmp/prompt.ptxt
---n_gens, -n
+--n_gens, -g
     Number of responses to generate (default: 4)
 --n_tokens, -t
     Number of tokens to generate (default: 128)
