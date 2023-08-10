@@ -4,11 +4,26 @@ from pathlib import Path
 from backend_utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
 # import backend_gptq
 import backend_exllama
+from optparse import OptionParser
+
+opt_parser = OptionParser()
+opt_parser.add_option(
+    "-m", "--model",
+    action="store", dest="model", type="string",
+    help="full path to the model")
+
+options, args = opt_parser.parse_args()
+assert options.model is not None, "Use --model /path/to/the/model.safetensors"
+model_path = Path(options.model)
+if model_path.suffix == ".safetensors":
+    model_basename = model_path.stem
+    model_path = model_path.parent
+else:
+    model_basename = None
+
 
 STORY = "/tmp/prompt.ptxt"
 ACTUAL_PROMPT = f"{STORY}.act"
-MODEL_ID_PATH = os.path.expanduser("~/models/Nous-Hermes-Llama2-GPTQ")
-MODEL_BASENAME = "gptq_model-4bit-128g"
 PROMPT_LEN_TO_SPLIT = 2000
 N_GENS = 4
 MARKER = ";;;"
@@ -59,8 +74,8 @@ def reconstruct_prompt(whole_prompt):
 
 backend = backend_exllama.backend_exllama
 backend(CMD_INIT, None, {
-    backend_exllama.MODEL_NAME_OR_PATH: MODEL_ID_PATH,
-    backend_exllama.MODEL_BASENAME: MODEL_BASENAME
+    backend_exllama.MODEL_NAME_OR_PATH: model_path,
+    backend_exllama.MODEL_BASENAME: model_basename
 })
 
 export_prompt()

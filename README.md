@@ -2,7 +2,10 @@ ReAIterator: reiterate text file through AI
 
 Simple script to call the text editor to edit prompt for the model.
 Editor is configured by $EDITOR env var(vim is default). 
-Everything other is hardcoded for YAGNI purposes.
+
+Options:
+--model, -m
+    Path to the model. E.g. /home/user/models/llama2.gptq/gptq/model-4bit-128g.safetensors
 
 Features are
 * It allows to mark blocks of text to be excluded from generation.
