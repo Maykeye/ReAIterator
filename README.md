@@ -37,7 +37,7 @@ Write touhou story.
 
 ### Response:
 (Cool adventures)
-Remilia: Sakuya, lets start danmakue
+Remilia: Sakuya, lets start danmaku
 [The fight starts]
 ```
 
@@ -57,14 +57,15 @@ Write touhou story.
 
 ### Response:
 (Cool adventures)
-Remilia: Sakuya, lets start danmakue
+Remilia: Sakuya, lets start danmaku
 [The fight starts]
 ```
 
 Old instruction after ;;;--- will be discarded for the next generation.
 After that you can use the result to describe the fight scene.
 
-TODO:
-[ ] nested structure.
-[ ] better markers for "remove N whitespaces from the last section"
-[ ] use input() instead of system, so VS code in different window can be used
+Possible TODO:
+
+[ ] nested structure.    
+[ ] better markers for "remove N whitespaces from the last section"    
+[ ] use input() instead of system, so VS code in different window can be used    
