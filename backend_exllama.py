@@ -3,17 +3,29 @@ from exllama.tokenizer import ExLlamaTokenizer
 from exllama.generator import ExLlamaGenerator
 import os
 import glob
+import random
 from backend_utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
 from backend_utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K
+from typing import Optional
 
 
 MODEL_NAME_OR_PATH = "model_directory"
 MODEL_BASENAME = "model_basename"
 model = None
 tokenizer = None
-generator: ExLlamaGenerator = None
+generator: Optional[ExLlamaGenerator] = None
 gen_config = {}
 
+def randomize_parms():
+    def sample_setting(key):
+        value = gen_config[key]
+        delta = value * 0.1 * (random.random() - 0.5)
+        return value + delta
+    assert generator is not None
+    generator.settings.token_repetition_penalty_max = 1.2
+    generator.settings.temperature = sample_setting(G_TEMPERATURE)
+    generator.settings.top_p = sample_setting(G_TOP_P)
+    generator.settings.top_k = int(sample_setting(G_TOP_K))
 
 def backend_exllama(cmd, prompt=None, cfg={}):
     global model
@@ -39,28 +51,22 @@ def backend_exllama(cmd, prompt=None, cfg={}):
         generator = ExLlamaGenerator(model, tokenizer, cache)
 
         generator.disallow_tokens([tokenizer.eos_token_id])
-
-        generator.settings.token_repetition_penalty_max = 1.2
-        generator.settings.temperature = 0.95
-        generator.settings.top_p = 0.75
-        generator.settings.top_k = 140
         generator.settings.typical = 0.5
-        if cfg[G_REPETITION_PENALTY] is not None:
-            generator.settings.token_repetition_penalty_max = cfg[G_REPETITION_PENALTY]
-        if cfg[G_TEMPERATURE] is not None:
-            generator.settings.temperature = cfg[G_TEMPERATURE]
-        if cfg[G_TOP_P] is not None:
-            generator.settings.top_p = cfg[G_TOP_P]
-        if cfg[G_TOP_K] is not None:
-            generator.settings.top_k = cfg[G_TOP_K]
         gen_config[N_TOKENS] = cfg[N_TOKENS]
+        gen_config[G_REPETITION_PENALTY] = cfg[G_REPETITION_PENALTY] or 1.20
+        gen_config[G_TEMPERATURE] = cfg[G_TEMPERATURE] or 0.95
+        gen_config[G_TOP_P] = cfg[G_TOP_P] or 0.75
+        gen_config[G_TOP_K] = cfg[G_TOP_K] or 140
         return
 
     if cmd == CMD_TOKEN_COUNT:
         assert prompt is not None
+        assert tokenizer is not None
         return tokenizer.encode(prompt).shape[1]
 
     if cmd == CMD_GENERATE:
+        randomize_parms()
+        assert generator is not None
         output = generator.generate_simple(prompt, max_new_tokens=gen_config[N_TOKENS])
         return output
 
