@@ -4,17 +4,16 @@ from exllama.generator import ExLlamaGenerator
 import os
 import glob
 import random
-from backend_utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
-from backend_utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K
+from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT
+from backends.utils import MODEL_BASENAME, MODEL_NAME_OR_PATH
+from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K, N_TOKENS
 from typing import Optional
 
-
-MODEL_NAME_OR_PATH = "model_directory"
-MODEL_BASENAME = "model_basename"
-model = None
-tokenizer = None
+model: Optional[ExLlama] = None
+tokenizer: Optional[ExLlamaTokenizer] = None
 generator: Optional[ExLlamaGenerator] = None
 gen_config = {}
+
 
 def randomize_parms():
     def sample_setting(key):
@@ -26,6 +25,7 @@ def randomize_parms():
     generator.settings.temperature = sample_setting(G_TEMPERATURE)
     generator.settings.top_p = sample_setting(G_TOP_P)
     generator.settings.top_k = int(sample_setting(G_TOP_K))
+
 
 def backend_exllama(cmd, prompt=None, cfg={}):
     global model
@@ -44,6 +44,8 @@ def backend_exllama(cmd, prompt=None, cfg={}):
 
         config = ExLlamaConfig(model_config_path)
         config.model_path = model_path
+        config.max_seq_len = 4096
+
         model = ExLlama(config)
         tokenizer = ExLlamaTokenizer(tokenizer_path)
 
@@ -59,10 +61,13 @@ def backend_exllama(cmd, prompt=None, cfg={}):
         gen_config[G_TOP_K] = cfg[G_TOP_K] or 140
         return
 
+    assert tokenizer is not None
+
     if cmd == CMD_TOKEN_COUNT:
         assert prompt is not None
-        assert tokenizer is not None
         return tokenizer.encode(prompt).shape[1]
+
+    assert model is not None
 
     if cmd == CMD_GENERATE:
         randomize_parms()

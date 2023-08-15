@@ -1,10 +1,10 @@
 from tqdm.auto import tqdm
 import os
 from pathlib import Path
-from backend_utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
-from backend_utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K
-# import backend_gptq
-import backend_exllama
+from backends.utils import MODEL_NAME_OR_PATH, MODEL_BASENAME
+from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
+from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K
+from backends.exllama.backend import backend_exllama as backend
 from optparse import OptionParser
 
 opt_parser = OptionParser()
@@ -110,10 +110,9 @@ def reconstruct_prompt(whole_prompt):
     return res
 
 
-backend = backend_exllama.backend_exllama
 backend(CMD_INIT, None, {
-    backend_exllama.MODEL_NAME_OR_PATH: model_path,
-    backend_exllama.MODEL_BASENAME: model_basename,
+    MODEL_NAME_OR_PATH: model_path,
+    MODEL_BASENAME: model_basename,
     G_TEMPERATURE: options.g_temperature,
     G_REPETITION_PENALTY: options.g_repetition_penalty,
     G_TOP_P: options.g_top_p,

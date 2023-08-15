@@ -1,10 +1,9 @@
 from auto_gptq import AutoGPTQForCausalLM
 from transformers import AutoTokenizer
-from backend_utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
-from backend_utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K
+from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
+from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K
+from backends.utils import MODEL_BASENAME, MODEL_NAME_OR_PATH
 
-MODEL_NAME_OR_PATH = "model_name_or_path"
-MODEL_BASENAME = "model_basename"
 USE_TRITON = "use_triton"
 USE_SAFETENSORS = "use_safetensors"
 TRUST_REMOTE_CODE = "trust_remote_code"
@@ -52,4 +51,4 @@ def backend_gptq(cmd, prompt=None, cfg={}):
             max_new_tokens=gen_config[N_TOKENS])
         return tokenizer.decode(outs[0], skip_special_tokens=True)
 
-    raise ValueError(f"Unknown command {cmd}")
+    raise ValueError(f"Unknown/unsupported command {cmd}")

@@ -17,12 +17,22 @@ Options:
 --g_temperature, --g_repetition_penalty, --g_top_p, --g_top_k
     Generator parameters
 
+Example:
+
+```console 
+$ python reAIterator.py --model ~/models/MythoMix-L2-13B-GPTQ/gptq_model-4bit-128g.safetensors --prompt /tmp/a.ptxt -g 4 -t 120 --g_temperature=0.69 --g_repetition_penalty=1.13 --g_top_p=0.95 -x 4000
+```
+
 Features are
 * It allows to mark blocks of text to be excluded from generation.
 * It generates 4 responses one by one to preserve precious VRAM
+* Responses are generated with randomized setting (each setting is +/- 5%)
 * It has token count threshold. After threshold is reached, script will commplain and
 ask to edit the prompt.
 * Goes with even simpler script roll.py to roll dice in another session
+
+Caveats:
+* vim adds EOL. Use :set noeol / add ;;;- at the end to remove it
 
 Blocks of text are separated by marker ;;;
 ;;;--- means exclude all further blocks
@@ -66,6 +76,7 @@ After that you can use the result to describe the fight scene.
 
 Possible TODO:
 
+[ ] Add --remove-last-eol-because-i-am-too-lazy-to-configure-vim option    
+[ ] use input() instead of system, so VS code in different window can be used    
 [ ] nested structure.    
 [ ] better markers for "remove N whitespaces from the last section"    
-[ ] use input() instead of system, so VS code in different window can be used    
