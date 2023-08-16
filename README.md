@@ -30,6 +30,7 @@ Features are
 * It has token count threshold. After threshold is reached, script will commplain and
 ask to edit the prompt.
 * Goes with even simpler script roll.py to roll dice in another session
+* (Currently exLlama backend only): randomizes parameters every N tokens during single generation to shake text generation
 
 Caveats:
 * vim adds EOL. Use :set noeol / add ;;;- at the end to remove it
