@@ -75,7 +75,9 @@ Old instruction after ;;;--- will be discarded for the next generation.
 After that you can use the result to describe the fight scene.
 
 Possible TODO:
-
+[ ] parametrize backend via cmdline
+[ ] parametrize finetune step and explore it so it works rather than hinder experience
+[ ] figure out is it possible/feasable to finetune on the go for gptq/exllama
 [ ] Add --remove-last-eol-because-i-am-too-lazy-to-configure-vim option    
 [ ] use input() instead of system, so VS code in different window can be used    
 [ ] nested structure.    

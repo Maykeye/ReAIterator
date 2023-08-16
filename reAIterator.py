@@ -2,9 +2,10 @@ from tqdm.auto import tqdm
 import os
 from pathlib import Path
 from backends.utils import MODEL_NAME_OR_PATH, MODEL_BASENAME
-from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, N_TOKENS
-from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K
+from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, CMD_FINETUNE_RESET, CMD_FINETUNE_STEP
+from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K, N_TOKENS, G_FINETUNE_STEP
 from backends.exllama.backend import backend_exllama as backend
+# from backends.transformers.backend import backend_transformers as backend
 from optparse import OptionParser
 
 opt_parser = OptionParser()
@@ -117,6 +118,7 @@ backend(CMD_INIT, None, {
     G_REPETITION_PENALTY: options.g_repetition_penalty,
     G_TOP_P: options.g_top_p,
     G_TOP_K: options.g_top_k,
+    G_FINETUNE_STEP: None,  # NYI
     N_TOKENS: n_tokens
 })
 
@@ -132,7 +134,10 @@ while True:
     print(f"Prompt length: {current_len}")
     start = len(reconstructed_prompt)
     outs = [""]
+    backend(CMD_FINETUNE_RESET)
+    backend(CMD_FINETUNE_STEP, reconstructed_prompt)
     for _ in tqdm(range(n_gens), desc="Generations"):
+        backend(CMD_FINETUNE_STEP, reconstructed_prompt)
         generated = backend(CMD_GENERATE, prompt=reconstructed_prompt)
         outs.append(generated[start:])
 

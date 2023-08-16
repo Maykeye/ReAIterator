@@ -4,7 +4,7 @@ from exllama.generator import ExLlamaGenerator
 import os
 import glob
 import random
-from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT
+from backends.utils import CMD_FINETUNE_RESET, CMD_FINETUNE_STEP, CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT
 from backends.utils import MODEL_BASENAME, MODEL_NAME_OR_PATH
 from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K, N_TOKENS
 from typing import Optional
@@ -74,5 +74,10 @@ def backend_exllama(cmd, prompt=None, cfg={}):
         assert generator is not None
         output = generator.generate_simple(prompt, max_new_tokens=gen_config[N_TOKENS])
         return output
+
+    if cmd == CMD_FINETUNE_RESET:
+        return
+    if cmd == CMD_FINETUNE_STEP:
+        return
 
     raise ValueError(f"Unknown command {cmd}")
