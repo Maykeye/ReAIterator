@@ -98,6 +98,7 @@ def backend_transformers(cmd, prompt=None, cfg={}):
         assert finetune_zero_state is not None
         finetune.load_state_dict(finetune_zero_state)
         return
+
     if cmd == CMD_FINETUNE_STEP:
         return
         assert finetune is not None

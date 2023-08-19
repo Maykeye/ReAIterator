@@ -1,7 +1,7 @@
 from tqdm.auto import tqdm
 import os
 from pathlib import Path
-from backends.utils import G_MINIGEN_STEP, MODEL_NAME_OR_PATH, MODEL_BASENAME
+from backends.utils import G_MINIGEN_STEP, G_MINIGEN_STEP_MIN, MODEL_NAME_OR_PATH, MODEL_BASENAME
 from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, CMD_FINETUNE_RESET, CMD_FINETUNE_STEP
 from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K, N_TOKENS, G_FINETUNE_STEP
 from backends.exllama.backend import backend_exllama as backend
@@ -120,6 +120,7 @@ backend(CMD_INIT, None, {
     G_TOP_K: options.g_top_k,
     G_FINETUNE_STEP: None,  # NYI
     G_MINIGEN_STEP: None,  # NYI
+    G_MINIGEN_STEP_MIN: None,  # NYI
     N_TOKENS: n_tokens
 })
 

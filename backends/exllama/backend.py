@@ -6,7 +6,7 @@ import glob
 import random
 from backends.utils import CMD_FINETUNE_RESET, CMD_FINETUNE_STEP, CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT
 from backends.utils import MODEL_BASENAME, MODEL_NAME_OR_PATH
-from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K, N_TOKENS, G_MINIGEN_STEP
+from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K, N_TOKENS, G_MINIGEN_STEP, G_MINIGEN_STEP_MIN
 from typing import Optional
 
 model: Optional[ExLlama] = None
@@ -59,7 +59,8 @@ def backend_exllama(cmd, prompt=None, cfg={}):
         gen_config[G_TEMPERATURE] = cfg[G_TEMPERATURE] or 0.95
         gen_config[G_TOP_P] = cfg[G_TOP_P] or 0.75
         gen_config[G_TOP_K] = cfg[G_TOP_K] or 140
-        gen_config[G_MINIGEN_STEP] = cfg[G_MINIGEN_STEP] or 15
+        gen_config[G_MINIGEN_STEP] = cfg[G_MINIGEN_STEP] or 50
+        gen_config[G_MINIGEN_STEP_MIN] = cfg[G_MINIGEN_STEP_MIN] or 3
         return
 
     assert tokenizer is not None
@@ -73,8 +74,12 @@ def backend_exllama(cmd, prompt=None, cfg={}):
     if cmd == CMD_GENERATE:
         assert generator is not None
         text = prompt
-        for i in range(0, gen_config[N_TOKENS], gen_config[G_MINIGEN_STEP]):
-            to_gen = min(gen_config[G_MINIGEN_STEP], gen_config[N_TOKENS]-i)
+        i = 0
+        while i < gen_config[N_TOKENS]:
+            print(i, gen_config[N_TOKENS])
+            n = random.randint(gen_config[G_MINIGEN_STEP_MIN], gen_config[G_MINIGEN_STEP])
+            to_gen = min(n, gen_config[N_TOKENS]-i)
+            i += to_gen
             randomize_parms()
             text = generator.generate_simple(text, max_new_tokens=to_gen)
         return text
