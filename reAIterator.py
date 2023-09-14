@@ -2,7 +2,7 @@ from tqdm.auto import tqdm
 import os
 from pathlib import Path
 from backends.utils import G_MINIGEN_STEP, G_MINIGEN_STEP_MIN, MODEL_NAME_OR_PATH, MODEL_BASENAME
-from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, CMD_FINETUNE_RESET, CMD_FINETUNE_STEP
+from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT
 from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K, N_TOKENS, G_FINETUNE_STEP
 from optparse import OptionParser
 
@@ -10,8 +10,8 @@ opt_parser = OptionParser()
 opt_parser.add_option(
     "-b", "--backend", 
     type="choice", dest="backend", action="store",
-    choices=["exllama", "autogptq", "transformers"],
-    help="Backend for the inference. One of: exllama(default), autogptq, transformers",
+    choices=["exllama", "autogptq", "transformers", "vllm"],
+    help="Backend for the inference. One of: exllama(default), autogptq, transformers, vllm",
     default="exllama")
 opt_parser.add_option(
     "-m", "--model",
@@ -66,6 +66,8 @@ elif options.backend == "autogptq":
     from backends.gptq.gptq import backend_gptq as backend
 elif options.backend == "transformers":
     from backends.transformers.backend import backend_transformers as backend
+elif options.backend == "vllm":
+    from backends.vllm.backend import backend_vllm as backend
 else:
     raise ValueError(f"Unknown backend {options.backend}")
 
@@ -149,10 +151,7 @@ while True:
     print(f"Prompt length: {current_len}")
     start = len(reconstructed_prompt)
     outs = [""]
-    backend(CMD_FINETUNE_RESET)
-    backend(CMD_FINETUNE_STEP, reconstructed_prompt)
     for _ in tqdm(range(n_gens), desc="Generations"):
-        backend(CMD_FINETUNE_STEP, reconstructed_prompt)
         generated = backend(CMD_GENERATE, prompt=reconstructed_prompt)
         outs.append(generated[start:])
 

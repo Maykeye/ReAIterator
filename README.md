@@ -4,6 +4,8 @@ Simple script to call the text editor to edit prompt for the model.
 Editor is configured by $EDITOR env var(vim is default). 
 
 Options:
+--backend, -b
+    Backend to use. Supported: exllama(default), autogptq, transformers, vllm
 --model, -m (mandatory)
     Path to the model. E.g. /home/user/models/llama2.gptq/gptq/model-4bit-128g.safetensors
 --prompt, -p (default: /tmp/prompt.ptxt)
@@ -14,8 +16,6 @@ Options:
     Number of tokens to generate
 --max_len, -x
     Maximum number of tokens in prompt
---backend, -b
-    Backend to use. Supported: exllama(default), autogptq, transformers
 --g_temperature, --g_repetition_penalty, --g_top_p, --g_top_k
     Generator parameters
 
@@ -36,6 +36,7 @@ ask to edit the prompt.
 
 Caveats:
 * vim adds EOL. Use :set noeol / add ;;;- at the end to remove it
+* vllm doesn't support models with headsizes not divisible by 8. openllama3b will not work
 
 Blocks of text are separated by marker ;;;
 ;;;--- means exclude all further blocks
