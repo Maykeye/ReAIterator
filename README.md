@@ -14,6 +14,8 @@ Options:
     Number of tokens to generate
 --max_len, -x
     Maximum number of tokens in prompt
+--backend, -b
+    Backend to use. Supported: exllama(default), autogptq, transformers
 --g_temperature, --g_repetition_penalty, --g_top_p, --g_top_k
     Generator parameters
 

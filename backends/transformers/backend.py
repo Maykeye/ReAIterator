@@ -8,7 +8,6 @@ from transformers.models.llama import LlamaForCausalLM, LlamaConfig
 import torch.nn as nn
 import random
 from backends.utils import get_model_layers_list, get_model_finalizer
-from backends.utils import prepare_last_layer_cache, load_last_layer_from_cache
 from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT
 from backends.utils import CMD_FINETUNE_STEP, CMD_FINETUNE_RESET
 from backends.utils import MODEL_NAME_OR_PATH
@@ -21,7 +20,6 @@ tokenizer: Optional[AutoTokenizer] = None
 gen_config = {}
 finetune: Optional[nn.Module] = None
 finetune_zero_state: Optional[dict] = None
-last_layer = None
 
 
 def randomize_parms():
@@ -43,17 +41,11 @@ def backend_transformers(cmd, prompt=None, cfg={}):
 
     if cmd == CMD_INIT:
         model_directory = str(cfg[MODEL_NAME_OR_PATH])
-        cached_layer_path = prepare_last_layer_cache(
-            model_directory,
-            lambda folder: AutoModelForCausalLM.from_pretrained(folder, torch_dtype=torch.bfloat16))
-
         model = AutoModelForCausalLM.from_pretrained(
             model_directory,
             load_in_4bit=True,
             torch_dtype=torch.bfloat16
         )
-        last_layer = load_last_layer_from_cache(model, cached_layer_path)
-        get_model_layers_list(model)[-1] = last_layer
         tokenizer = AutoTokenizer.from_pretrained(model_directory)
         if tokenizer.pad_token_id is None:
             tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -65,10 +57,6 @@ def backend_transformers(cmd, prompt=None, cfg={}):
         gen_config[G_FINETUNE_STEP] = cfg[G_FINETUNE_STEP] or 75
         model.requires_grad_(False)
 
-        finetune_zero_state = last_layer.state_dict()
-        finetune = last_layer
-        finetune.requires_grad_(True)
-        get_model_finalizer(model).requires_grad_(True)
         return
 
     assert tokenizer is not None
@@ -95,26 +83,9 @@ def backend_transformers(cmd, prompt=None, cfg={}):
         return tokenizer.decode(out[0])
 
     if cmd == CMD_FINETUNE_RESET:
-        assert finetune_zero_state is not None
-        finetune.load_state_dict(finetune_zero_state)
         return
 
     if cmd == CMD_FINETUNE_STEP:
         return
-        assert finetune is not None
-        inputs = tokenizer(prompt, return_tensors='pt').to("cuda")
-        opt = torch.optim.AdamW(model.parameters(), lr=1e-4)
-        loss = None
-        bar = tqdm(range(0, inputs.input_ids.shape[-1], gen_config[G_FINETUNE_STEP]))
-
-        for i in bar:
-            input_ids = inputs["input_ids"][:, i:i+gen_config[G_FINETUNE_STEP]]
-            loss = model(input_ids=input_ids, labels=input_ids).loss
-            loss.backward()
-            opt.step()
-            opt.zero_grad()
-            bar.set_description(f"CUR LOSS: {loss.item()}")
-
-        return None
 
     raise ValueError(f"Unknown command {cmd}")

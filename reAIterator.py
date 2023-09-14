@@ -4,11 +4,15 @@ from pathlib import Path
 from backends.utils import G_MINIGEN_STEP, G_MINIGEN_STEP_MIN, MODEL_NAME_OR_PATH, MODEL_BASENAME
 from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT, CMD_FINETUNE_RESET, CMD_FINETUNE_STEP
 from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K, N_TOKENS, G_FINETUNE_STEP
-from backends.exllama.backend import backend_exllama as backend
-# from backends.transformers.backend import backend_transformers as backend
 from optparse import OptionParser
 
 opt_parser = OptionParser()
+opt_parser.add_option(
+    "-b", "--backend", 
+    type="choice", dest="backend", action="store",
+    choices=["exllama", "autogptq", "transformers"],
+    help="Backend for the inference. One of: exllama(default), autogptq, transformers",
+    default="exllama")
 opt_parser.add_option(
     "-m", "--model",
     action="store", dest="model", type="string",
@@ -55,6 +59,15 @@ if model_path.suffix == ".safetensors":
     model_path = model_path.parent
 else:
     model_basename = None
+
+if options.backend == "exllama":
+    from backends.exllama.backend import backend_exllama as backend
+elif options.backend == "autogptq":
+    from backends.gptq.gptq import backend_gptq as backend
+elif options.backend == "transformers":
+    from backends.transformers.backend import backend_transformers as backend
+else:
+    raise ValueError(f"Unknown backend {options.backend}")
 
 prompt_path = options.prompt
 reconstructed_prompt_path = f"{prompt_path}.act"
