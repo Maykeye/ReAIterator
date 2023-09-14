@@ -21,7 +21,9 @@ def randomize_parms():
         delta = value * 0.1 * (random.random() - 0.5)
         return value + delta
     assert generator is not None
-    generator.settings.token_repetition_penalty_max = 1.2
+    generator.settings.token_repetition_penalty_decay = 300
+    generator.settings.token_repetition_penalty_sustain = 400
+    generator.settings.token_repetition_penalty_max = 1.0001
     generator.settings.temperature = sample_setting(G_TEMPERATURE)
     generator.settings.top_p = sample_setting(G_TOP_P)
     generator.settings.top_k = int(sample_setting(G_TOP_K))
