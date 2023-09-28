@@ -10,8 +10,8 @@ opt_parser = OptionParser()
 opt_parser.add_option(
     "-b", "--backend", 
     type="choice", dest="backend", action="store",
-    choices=["exllama", "autogptq", "transformers", "vllm"],
-    help="Backend for the inference. One of: exllama(default), autogptq, transformers, vllm",
+    choices=["exllama", "autogptq", "transformers", "vllm", "llama_cpp"],
+    help="Backend for the inference. One of: exllama(default), autogptq, llama_cpp, transformers, vllm",
     default="exllama")
 opt_parser.add_option(
     "-m", "--model",
@@ -66,6 +66,8 @@ elif options.backend == "autogptq":
     from backends.gptq.gptq import backend_gptq as backend
 elif options.backend == "transformers":
     from backends.transformers.backend import backend_transformers as backend
+elif options.backend == "llama_cpp":
+    from backends.llama_cpp.backend import backend_llama_cpp as backend
 elif options.backend == "vllm":
     from backends.vllm.backend import backend_vllm as backend
 else:

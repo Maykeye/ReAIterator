@@ -5,7 +5,7 @@ Editor is configured by $EDITOR env var(vim is default).
 
 Options:
 --backend, -b
-    Backend to use. Supported: exllama(default), autogptq, transformers, vllm
+    Backend to use. Supported: exllama(default), autogptq, transformers, vllm, llama_cpp
 --model, -m (mandatory)
     Path to the model. E.g. /home/user/models/llama2.gptq/gptq/model-4bit-128g.safetensors
 --prompt, -p (default: /tmp/prompt.ptxt)
@@ -23,6 +23,8 @@ Example:
 
 ```console 
 $ python reAIterator.py --model ~/models/MythoMix-L2-13B-GPTQ/gptq_model-4bit-128g.safetensors --prompt /tmp/a.ptxt -g 4 -t 120 --g_temperature=0.69 --g_repetition_penalty=1.13 --g_top_p=0.95 -x 4000
+
+$ python reAIterator.py --model ~/models/mistral-7b-v0.1.Q4_K_M.gguf --prompt /tmp/a.ptxt
 ```
 
 Features are
