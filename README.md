@@ -5,7 +5,7 @@ Editor is configured by $EDITOR env var(vim is default).
 
 Options:
 --backend, -b
-    Backend to use. Supported: exllama(default), autogptq, transformers, vllm, llama_cpp
+    Backend to use. Supported: exllama(default), exllama2, autogptq, transformers, vllm, llama_cpp
 --model, -m (mandatory)
     Path to the model. E.g. /home/user/models/llama2.gptq/gptq/model-4bit-128g.safetensors
 --prompt, -p (default: /tmp/prompt.ptxt)

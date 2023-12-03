@@ -13,6 +13,7 @@ MODEL_NAME_OR_PATH = "model_path_id"
 MODEL_BASENAME = "model_basename"
 N_TOKENS = "n_tokens"
 
+# TODO: class instead of dict
 G_TEMPERATURE = "g_temperature"
 G_REPETITION_PENALTY = "g_repetition_penalty"
 G_TOP_P = "g_top_p"
@@ -20,6 +21,7 @@ G_TOP_K = "g_top_k"
 G_FINETUNE_STEP = "g_finetune_step"
 G_MINIGEN_STEP_MIN = "g_minigen_step_min"
 G_MINIGEN_STEP = "g_minigen_step"
+G_MAX_LEN = "g_max_len"
 
 # TODO: maybe generalize to sum([m(x) for m in module_list[1:]], module_list[0](x))
 

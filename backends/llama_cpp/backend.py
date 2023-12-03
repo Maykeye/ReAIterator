@@ -4,7 +4,7 @@ from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT
 from backends.utils import CMD_FINETUNE_STEP, CMD_FINETUNE_RESET
 from backends.utils import MODEL_NAME_OR_PATH
 from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K, N_TOKENS
-from backends.utils import G_FINETUNE_STEP
+from backends.utils import G_MAX_LEN
 from typing import Optional
 
 model: Optional[Llama] = None
@@ -29,7 +29,10 @@ def backend_llama_cpp(cmd, prompt:Optional[str]=None, cfg={}):
 
     if cmd == CMD_INIT:
         gguf_path = str(cfg[MODEL_NAME_OR_PATH])
-        model = Llama(model_path=gguf_path, n_ctx=4096, n_gpu_layers=35)
+        n_gpu_layers=35
+        if "13B" in gguf_path.upper():
+            n_gpu_layers=42
+        model = Llama(model_path=gguf_path, n_ctx=cfg[G_MAX_LEN], n_gpu_layers=n_gpu_layers) #TODO: make configurable
         cache = LlamaRAMCache()
         model.set_cache(cache)
         gen_config[N_TOKENS] = cfg[N_TOKENS]
@@ -37,7 +40,6 @@ def backend_llama_cpp(cmd, prompt:Optional[str]=None, cfg={}):
         gen_config[G_TEMPERATURE] = cfg[G_TEMPERATURE] or 0.95
         gen_config[G_TOP_P] = cfg[G_TOP_P] or 0.75
         gen_config[G_TOP_K] = cfg[G_TOP_K] or 140
-        gen_config[G_FINETUNE_STEP] = cfg[G_FINETUNE_STEP] or 75
         return
 
 

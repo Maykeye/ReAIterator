@@ -1,17 +1,17 @@
 from tqdm.auto import tqdm
 import os
 from pathlib import Path
-from backends.utils import G_MINIGEN_STEP, G_MINIGEN_STEP_MIN, MODEL_NAME_OR_PATH, MODEL_BASENAME
+from backends.utils import G_MAX_LEN, G_MINIGEN_STEP, G_MINIGEN_STEP_MIN, MODEL_NAME_OR_PATH, MODEL_BASENAME
 from backends.utils import CMD_INIT, CMD_GENERATE, CMD_TOKEN_COUNT
 from backends.utils import G_TEMPERATURE, G_REPETITION_PENALTY, G_TOP_P, G_TOP_K, N_TOKENS, G_FINETUNE_STEP
 from optparse import OptionParser
 
 opt_parser = OptionParser()
 opt_parser.add_option(
-    "-b", "--backend", 
+    "-b", "--backend",
     type="choice", dest="backend", action="store",
-    choices=["exllama", "autogptq", "transformers", "vllm", "llama_cpp"],
-    help="Backend for the inference. One of: exllama(default), autogptq, llama_cpp, transformers, vllm",
+    choices=["exllama", "exllama2", "autogptq", "transformers", "vllm", "llama_cpp"],
+    help="Backend for the inference. One of: exllama(default), exllama2, autogptq, llama_cpp, transformers, vllm",
     default="exllama")
 opt_parser.add_option(
     "-m", "--model",
@@ -62,6 +62,8 @@ else:
 
 if options.backend == "exllama":
     from backends.exllama.backend import backend_exllama as backend
+elif options.backend == "exllama2":
+    from backends.exllama2.backend import backend_exllamav2 as backend
 elif options.backend == "autogptq":
     from backends.gptq.gptq import backend_gptq as backend
 elif options.backend == "transformers":
@@ -138,6 +140,7 @@ backend(CMD_INIT, None, {
     G_FINETUNE_STEP: None,  # NYI
     G_MINIGEN_STEP: None,  # NYI
     G_MINIGEN_STEP_MIN: None,  # NYI
+    G_MAX_LEN: max_len,
     N_TOKENS: n_tokens
 })
 
@@ -150,7 +153,7 @@ while True:
         export_prompt()
         continue
 
-    print(f"Prompt length: {current_len}")
+    print(f"Prompt length: {current_len} tokens")
     start = len(reconstructed_prompt)
     outs = [""]
     for _ in tqdm(range(n_gens), desc="Generations"):
