@@ -68,8 +68,9 @@ class A:
     DEX = 2
     CON = 3
     CHA = 4
-    LUC = 5
-    COUNT = 6
+    WIS = 5
+    LUC = 6
+    COUNT = 7
 
 
 @dataclass
@@ -77,8 +78,9 @@ class Attributes:
     strength: int
     intellect: int
     dexterity: int
-    constitution: int
     charisma: int
+    constitution: int
+    wisdom: int
     luck: int
 
     def __getitem__(self, idx:int)->int:
@@ -93,7 +95,7 @@ class Attributes:
         return max(1, self[attr_index] // div)
 
 
-def roll_attr(all="3d6", *, strength="", intellect="", dexterity="", constitution="", charisma="", luck=""):
+def roll_attr(all="3d6", *, strength="", intellect="", dexterity="", constitution="", charisma="", wisdom="", luck=""):
     def make_roll(s):
         if not s:
             return all
@@ -104,6 +106,7 @@ def roll_attr(all="3d6", *, strength="", intellect="", dexterity="", constitutio
     dexterity = make_roll(dexterity)
     constitution = make_roll(constitution)
     charisma = make_roll(charisma)
+    wisdom = make_roll(wisdom)
     luck = make_roll(luck)
 
     return Attributes(
@@ -112,6 +115,7 @@ def roll_attr(all="3d6", *, strength="", intellect="", dexterity="", constitutio
             dexterity=roll_dice(dexterity),
             constitution=roll_dice(constitution),
             luck=roll_dice(luck),
+            wisdom=roll_dice(wisdom),
             charisma=roll_dice(charisma))
     
 
@@ -146,6 +150,7 @@ youmu = Attributes(
         intellect=11,
         constitution=16,
         charisma=12,
+        wisdom=10,
         luck=0)
 
 giant_spider = Attributes(
@@ -154,6 +159,7 @@ giant_spider = Attributes(
         intellect=5,
         constitution=21,
         charisma=2,
+        wisdom=3,
         luck=0)
 
 
@@ -176,6 +182,18 @@ def simple_attack(self: Attributes, other: Attributes, weapon_attack) -> int: # 
         return max(0, damage)
     return 0
 
+def roll_by_dict(d: dict, n=1): # not named roll_dict to prevent name collision from roll_dice during autocomplete
+    keys = list(d.keys())
+    weights = list(d.values())
+    return random.choices(keys, weights=weights, k=n)
 
+NORTHERN_REGION = {
+    "Elf": 30,
+    "Human": 45,
+    "Orcs": 3,
+    "Elf-orc": 4,
+    "Human-orc": 8,
+    "Human-elves": 10
+}
 
 
